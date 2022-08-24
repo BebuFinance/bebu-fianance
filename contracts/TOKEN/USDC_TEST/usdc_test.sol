@@ -9,12 +9,9 @@ contract USDC_TEST is ERC20Burnable, Operator {
 
     uint amountLimit = 1e5 ether;
 
-    address constant test1 = 0x10A2A9905E97789074E51c79800747b6960e1131;
-    address constant test2 = 0xb2F8F0A7aa1567Dd5DcDBa22D9Be73684152E9Cb;
-
-    constructor() public ERC20("USDC TEST TOKEN", "USDC_TEST") {
-        _mint(test1, 1e8 ether);
-        _mint(test2, 1e8 ether);
+    constructor(address addr1, address addr2) public ERC20("USDC TEST TOKEN", "USDC_TEST") {
+        _mint(addr1, 1e8 ether);
+        _mint(addr2, 1e8 ether);
     }
 
     function setAmountLimit(uint256 _amountLimit) external onlyOperator {
