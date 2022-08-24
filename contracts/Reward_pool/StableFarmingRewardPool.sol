@@ -73,13 +73,13 @@ contract StableFarmingRewardPool {
     uint256 public poolEndTime;
 
     // withdraw and claim reward period
-    uint256 public period = 8 hours;
+    uint256 public period = 1 hours;
     uint256 public withdrawLockupEpochs;
     uint256 public rewardLockupEpochs;
 
-    uint256 public BebuPerSecond = 0.0006976 ether; // 42000 Bebu / (365 days * 24h * 60min * 60s)
+    uint256 public BebuPerSecond = 0.02536783 ether; // 800000 Bebu / (365 days * 24h * 60min * 60s)
     uint256 public runningTime = 365 days; // 365 days
-    uint256 public constant TOTAL_REWARDS = 22000 ether;
+    uint256 public constant TOTAL_REWARDS = 800000 ether;
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
@@ -95,8 +95,8 @@ contract StableFarmingRewardPool {
         poolStartTime = _poolStartTime;
         poolEndTime = poolStartTime + runningTime;
 
-        withdrawLockupEpochs = 6; // Lock for 6 epochs (48h) before release withdraw
-        rewardLockupEpochs = 1; // Lock for 3 epochs (24h) before release claimReward
+        withdrawLockupEpochs = 6; // Lock for 6 epochs (6h) before release withdraw
+        rewardLockupEpochs = 3; // Lock for 3 epochs (3h) before release claimReward
         operator = msg.sender;
     }
 
@@ -349,6 +349,7 @@ contract StableFarmingRewardPool {
             user.amount = user.amount.sub(_amount);
             pool.token.safeTransfer(_sender, _amount);
         }
+        user.TimerStart = block.timestamp;// reset timer
         user.rewardDebt = user.amount.mul(pool.accBebuPerShare).div(1e18);
         emit Withdraw(_sender, _pid, _amount);
     }

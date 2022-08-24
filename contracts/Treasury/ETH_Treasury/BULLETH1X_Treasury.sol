@@ -175,7 +175,7 @@ contract BULLETH1X_Treasury is ContractGuard {
 
         // Dynamic max expansion percent
         supplyTiers = [0 ether, 500000 ether, 1000000 ether, 1500000 ether, 2000000 ether, 5000000 ether, 10000000 ether, 20000000 ether, 50000000 ether];
-        maxExpansionTiers = [450, 400, 350, 300, 250, 200, 150, 125, 100];
+        maxExpansionTiers = [200, 180, 160, 140, 120, 100, 80, 60, 50];
 
         initialized = true;
         initialEpochEthPrice = uint256(getLatestEthPrice());
@@ -185,7 +185,13 @@ contract BULLETH1X_Treasury is ContractGuard {
         emit Initialized(msg.sender, block.number);
     }
 
+    function setChainlinkOracle(address _address) external onlyOperator {
+        require(_address != address(0), "zero");
+        priceFeed = AggregatorV3Interface(_address);
+    }
+
     function setPeriod(uint256 _period) external onlyOperator {
+        require(_period >= 0 && _period <= 48 hours, "_period: out of range");
         period = _period;
         IOracle(tokenOracle).setPeriod(_period);
     }
@@ -248,7 +254,6 @@ contract BULLETH1X_Treasury is ContractGuard {
     /* ========== MUTABLE FUNCTIONS ========== */
 
     function _updateTokenPrice() internal {
-   //     try IOracle(tokenOracle).update() {} catch {}
         IOracle(tokenOracle).update();
     }
 
@@ -295,7 +300,7 @@ contract BULLETH1X_Treasury is ContractGuard {
         return price;
     }
 
-    function getIndexPrice(uint _currentEthPrice, uint _initialEpochEthPrice, uint _initialTokenIndexPrice) public pure returns (uint) {
+    function getIndexPrice(uint _currentEthPrice, uint _initialEpochEthPrice, uint _initialTokenIndexPrice) internal pure returns (uint) {
         uint IndexPrice = _currentEthPrice.mul(_initialTokenIndexPrice).div(_initialEpochEthPrice);
         return IndexPrice;
     }
@@ -321,7 +326,7 @@ contract BULLETH1X_Treasury is ContractGuard {
         previousEpochTokenTwapPrice = getTokenPrice();
         currentEpochEthPrice = uint256(getLatestEthPrice());
         currentEpochTokenIndexPrice = getRealtimeTokenIndexPrice();
-        if(currentEpochTokenIndexPrice <= 1e6 || currentEpochTokenIndexPrice >= 1e8){
+        if(currentEpochTokenIndexPrice <= 1e5 || currentEpochTokenIndexPrice >= 1e8){
             currentEpochTokenIndexPrice = 1e7;
         }
         uint256 tokenSupply = getTokenCirculatingSupply();
@@ -336,14 +341,6 @@ contract BULLETH1X_Treasury is ContractGuard {
                 _sendToBoardroom(_savedForBoardroom);
             }
         }
-    }
-
-    function governanceRecoverUnsupported(
-        IERC20 _token,
-        uint256 _amount,
-        address _to
-    ) external onlyOperator {
-        _token.safeTransfer(_to, _amount);
     }
 
     function boardroomSetOperator(address _operator) external onlyOperator {
@@ -384,5 +381,13 @@ contract BULLETH1X_Treasury is ContractGuard {
 
     function burnTreasuryToken(uint256 amount) external onlyOperator {
         ERC20Burnable(token).burn(amount);
+    }
+
+    function governanceRecoverUnsupported(
+        IERC20 _token,
+        uint256 _amount,
+        address _to
+    ) external onlyOperator {
+        _token.safeTransfer(_to, _amount);
     }
 }

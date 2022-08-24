@@ -33,7 +33,7 @@ contract BULLETH1X is ERC20Burnable, Operator {
 
     // Initial distribution for the first 24h genesis pools
     uint256 public constant INITIAL_GENESIS_POOL_DISTRIBUTION = 11000 ether;
-    // Initial distribution for the day 2-5 token-WFTM LP -> token pool
+    // Initial distribution for the day 2-5 token-usdc LP -> token pool
     uint256 public constant INITIAL_token_POOL_DISTRIBUTION = 140000 ether;
     // Distribution for airdrops wallet
     uint256 public constant INITIAL_AIRDROP_WALLET_DISTRIBUTION = 9000 ether;
@@ -115,12 +115,8 @@ contract BULLETH1X is ERC20Burnable, Operator {
      * @notice Constructs the token ERC-20 contract.
      */
     constructor() public ERC20("BULLETH1X", "BULLETH1X") {
-        // Mints 1 token to contract creator for initial pool setup
-
         excludeAddressTax(address(this));
-
         _mint(msg.sender, 1 ether);
-
     }
 
     function enableTransaction() external onlyOwner {

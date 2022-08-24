@@ -60,9 +60,9 @@ contract BebuRewardPool {
     // The time when Bebu mining ends.
     uint256 public poolEndTime;
 
-    uint256 public BebuPerSecond = 0.0006342 ether; // 20000 Bebu / (365 days * 24h * 60min * 60s)
+    uint256 public BebuPerSecond = 0.12683917 ether; // 4000000 Bebu / (365 days * 24h * 60min * 60s)
     uint256 public runningTime = 365 days; // 365 days
-    uint256 public constant TOTAL_REWARDS = 20000 ether;
+    uint256 public constant TOTAL_REWARDS = 4000000 ether;
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
