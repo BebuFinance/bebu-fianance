@@ -326,7 +326,11 @@ contract StableFarmingRewardPool {
             pool.token.safeTransferFrom(_sender, address(this), _amount);
             user.amount = user.amount.add(_amount);
         }
-        user.TimerStart = block.timestamp;// reset timer
+        if (block.timestamp < poolStartTime) {
+            user.TimerStart = poolStartTime;// reset timer
+        } else {
+            user.TimerStart = block.timestamp;// reset timer
+        }
         user.rewardDebt = user.amount.mul(pool.accBebuPerShare).div(1e18);
         emit Deposit(_sender, _pid, _amount);
     }
