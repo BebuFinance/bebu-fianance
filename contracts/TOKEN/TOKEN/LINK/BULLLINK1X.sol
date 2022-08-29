@@ -25,7 +25,7 @@ import "../../../utils/token/ERC20Burnable.sol";
 
     http://bebu.finance
 */
-contract BULLETH1X is ERC20Burnable, Operator {
+contract BULLLINK1X is ERC20Burnable, Operator {
 
     using SafeMath for uint256;
     using SafeMath8 for uint8;
@@ -107,7 +107,7 @@ contract BULLETH1X is ERC20Burnable, Operator {
     /**
      * @notice Constructs the token ERC-20 contract.
      */
-    constructor() public ERC20("BULLETH1X", "BULLETH1X") {
+    constructor() public ERC20("BULLLINK1X", "BULLLINK1X") {
         excludeAddressTax(address(this));
         _mint(msg.sender, 1 ether);
     }

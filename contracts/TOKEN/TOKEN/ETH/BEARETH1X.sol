@@ -31,13 +31,6 @@ contract BEARETH1X is ERC20Burnable, Operator {
     using SafeMath8 for uint8;
     using Address for address;
 
-    // Initial distribution for the first 24h genesis pools
-    uint256 public constant INITIAL_GENESIS_POOL_DISTRIBUTION = 11000 ether;
-    // Initial distribution for the day 2-5 token-usdc LP -> token pool
-    uint256 public constant INITIAL_token_POOL_DISTRIBUTION = 140000 ether;
-    // Distribution for airdrops wallet
-    uint256 public constant INITIAL_AIRDROP_WALLET_DISTRIBUTION = 9000 ether;
-
     // Address of the router & pair
     address public router;
     address public pair;
@@ -47,6 +40,9 @@ contract BEARETH1X is ERC20Burnable, Operator {
 
     // Address of the Oracle
     address public tokenOracle;
+
+    // Address of TaxTo
+    address public taxTo;
 
     // transaction trigger
     bool public transactionOn = false;
@@ -74,9 +70,6 @@ contract BEARETH1X is ERC20Burnable, Operator {
 
     // tokens burn rate of tax  when open the tax
     uint256 public burnRate = 8000;
-
-    // Have the rewards been distributed to the pools
-    bool public rewardPoolDistributed = false;
 
     // Sender addresses excluded from Tax
     mapping(address => bool) public excludedAddressesTax;
@@ -129,12 +122,12 @@ contract BEARETH1X is ERC20Burnable, Operator {
         transactionOn = false;
     }
 
-    function disableSell() external onlyOwner {
+    function disableSellWithLowPrice() external onlyOwner {
         require(!forbidSellWithLowPrice, "alredy disabled");
         forbidSellWithLowPrice = true;
     }
 
-    function enableSell() external onlyOwner {
+    function enableSellWithLowPrice() external onlyOwner {
         require(forbidSellWithLowPrice, "alredy enabled");
         forbidSellWithLowPrice = false;
     }
@@ -284,6 +277,10 @@ contract BEARETH1X is ERC20Burnable, Operator {
         burnRate = _burnRate;
     }
 
+    function setTaxTo(address _taxTo) external onlyOwner {
+        taxTo = _taxTo;
+    }
+
     /* ================= Taxation =============== */
 
     function enableAutoCalculateTax() external onlyOwner {
@@ -405,30 +402,11 @@ contract BEARETH1X is ERC20Burnable, Operator {
                     uint256 burnAmount = tax.mul(burnRate).div(10000);
                     _burn(from, burnAmount);
                     tax = tax.sub(burnAmount);
-                    super._transfer(from, treasury, tax);
+                    super._transfer(from, taxTo, tax);
                 }
             }
         }
         super._transfer(from, to, amount);
-    }
-
-    
-    /**
-     * @notice distribute to reward pool (only once)
-     */
-    function distributeReward(
-        address _genesisPool,
-        address _tokenPool,
-        address _airdropWallet
-    ) external onlyOperator {
-        require(!rewardPoolDistributed, "only can distribute once");
-        require(_genesisPool != address(0), "!_genesisPool");
-        require(_tokenPool != address(0), "!_tokenPool");
-        require(_airdropWallet != address(0), "!_airdropWallet");
-        rewardPoolDistributed = true;
-        _mint(_genesisPool, INITIAL_GENESIS_POOL_DISTRIBUTION);
-        _mint(_tokenPool, INITIAL_token_POOL_DISTRIBUTION);
-        _mint(_airdropWallet, INITIAL_AIRDROP_WALLET_DISTRIBUTION);
     }
 
     function governanceRecoverUnsupported(
