@@ -54,13 +54,19 @@ contract StableFarmingRewardPool {
     // Index of TwoPoolInfo;
     uint256 index = 0;
 
+    // Deposit fee
+    uint256 public fee;
+
+    // Address of feeTo
+    address public feeTo;
+
     // Info of each pool.
     PoolInfo[] public poolInfo;
 
     // Info of each user that stakes LP tokens.
     mapping(uint256 => mapping(address => UserInfo)) public userInfo;
 
-    // blacklist
+    // Blacklist
     mapping(address => bool) public blacklist;
 
     // Total allocation points. Must be the sum of all allocation points in all pools.
@@ -72,7 +78,7 @@ contract StableFarmingRewardPool {
     // The time when Bebu mining ends.
     uint256 public poolEndTime;
 
-    // withdraw and claim reward period
+    // Withdraw and claim reward period
     uint256 public period = 1 hours;
     uint256 public withdrawLockupEpochs;
     uint256 public rewardLockupEpochs;
@@ -88,6 +94,7 @@ contract StableFarmingRewardPool {
 
     constructor(
         address _Bebu,
+        address dao_fund,
         uint256 _poolStartTime
     ) public {
         require(block.timestamp < _poolStartTime, "late");
@@ -98,6 +105,7 @@ contract StableFarmingRewardPool {
         withdrawLockupEpochs = 6; // Lock for 6 epochs (6h) before release withdraw
         rewardLockupEpochs = 3; // Lock for 3 epochs (3h) before release claimReward
         operator = msg.sender;
+        feeTo = dao_fund;
     }
 
     modifier onlyOperator() {
@@ -121,6 +129,15 @@ contract StableFarmingRewardPool {
         require(_withdrawLockupEpochs >= _rewardLockupEpochs && _withdrawLockupEpochs <= 42, "_withdrawLockupEpochs: out of range"); // <= 2 week
         withdrawLockupEpochs = _withdrawLockupEpochs;
         rewardLockupEpochs = _rewardLockupEpochs;
+    }
+
+    function setFee(uint256 _fee) external onlyOperator {
+        require(_fee >= 0 && _fee <= 10000, "out of range");
+        fee = _fee;
+    }
+
+    function setFeeTo(address _feeTo) external onlyOperator {
+        feeTo = _feeTo;
     }
 
     function canWithdraw(uint256 _pid, address _user) external view returns (bool) {
@@ -323,6 +340,11 @@ contract StableFarmingRewardPool {
             }
         }
         if (_amount > 0) {
+            if (fee > 0) {
+                uint tax = _amount.mul(fee).div(10000);
+                _amount = _amount.sub(tax);
+                pool.token.safeTransferFrom(_sender, feeTo, tax);
+            }
             pool.token.safeTransferFrom(_sender, address(this), _amount);
             user.amount = user.amount.add(_amount);
         }
