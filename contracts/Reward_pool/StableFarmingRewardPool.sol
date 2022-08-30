@@ -94,7 +94,7 @@ contract StableFarmingRewardPool {
 
     constructor(
         address _Bebu,
-        address dao_fund,
+        address _feeTo,
         uint256 _poolStartTime
     ) public {
         require(block.timestamp < _poolStartTime, "late");
@@ -105,7 +105,7 @@ contract StableFarmingRewardPool {
         withdrawLockupEpochs = 6; // Lock for 6 epochs (6h) before release withdraw
         rewardLockupEpochs = 3; // Lock for 3 epochs (3h) before release claimReward
         operator = msg.sender;
-        feeTo = dao_fund;
+        feeTo = _feeTo;
     }
 
     modifier onlyOperator() {

@@ -60,6 +60,7 @@ contract Boardroom is ShareWrapper, ContractGuard {
     uint256 public rewardLockupEpochs;
 
     uint256 public fee;
+    address public feeTo;
 
     /* ========== EVENTS ========== */
 
@@ -104,12 +105,14 @@ contract Boardroom is ShareWrapper, ContractGuard {
         IERC20 _token,
         IERC20 _share,
         ITreasury _treasury,
-        uint256 _fee
+        uint256 _fee,
+        address _feeTo
     ) public notInitialized {
         token = _token;
         share = _share;
         treasury = _treasury;
         fee = _fee;
+        feeTo = _feeTo;
 
         BoardroomSnapshot memory genesisSnapshot = BoardroomSnapshot({time: block.number, rewardReceived: 0, rewardPerShare: 0});
         boardroomHistory.push(genesisSnapshot);
@@ -135,6 +138,10 @@ contract Boardroom is ShareWrapper, ContractGuard {
     function setFee(uint256 _fee) external onlyOperator {
         require(_fee >= 0 && _fee <= 10000, "out of range");
         fee = _fee;
+    }
+
+    function setFeeTo(address _feeTo) external onlyOperator {
+        feeTo = _feeTo;
     }
 
     function addAddressBlacklist(address _address) public onlyOperator returns (bool) {
@@ -210,10 +217,10 @@ contract Boardroom is ShareWrapper, ContractGuard {
     function stake(uint256 amount) public override onlyOneBlock updateReward(msg.sender) {
         require(!isAddressBlacklist(msg.sender), "blacklist");
         require(amount > 0, "Boardroom: Cannot stake 0");
-        if(fee > 0){
+        if (fee > 0) {
             uint tax = amount.mul(fee).div(10000);
             amount = amount.sub(tax);
-            share.safeTransferFrom(msg.sender, address(treasury), tax);
+            share.safeTransferFrom(msg.sender, feeTo, tax);
         }
         super.stake(amount);
         members[msg.sender].epochTimerStart = treasury.epoch(); // reset timer

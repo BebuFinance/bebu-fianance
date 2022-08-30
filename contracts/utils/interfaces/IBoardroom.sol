@@ -21,6 +21,8 @@ interface IBoardroom {
 
     function setFee(uint256 _fee) external;
 
+    function setFeeTo(address _feeTo) external;
+
     function setLockUp(uint256 _withdrawLockupEpochs, uint256 _rewardLockupEpochs) external;
 
     function stake(uint256 _amount) external;
