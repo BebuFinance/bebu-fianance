@@ -361,6 +361,10 @@ contract BEARETH1X_Treasury is ContractGuard {
         IBoardroom(boardroom).setFee(_fee);
     }
 
+    function boardroomSetFeeTo(address _feeTo) external onlyOperator {
+        IBoardroom(boardroom).setFeeTo(_feeTo);
+    }
+
     function boardroomAddAddressBlacklist(address _address) external onlyOperator {
         IBoardroom(boardroom).addAddressBlacklist(_address);
     }

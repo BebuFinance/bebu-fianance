@@ -20,11 +20,11 @@ import "../../utils/access/Operator.sol";
 contract Bebu is ERC20Burnable, Operator {
     using SafeMath for uint256;
 
-    // TOTAL MAX SUPPLY = 6,000,000 bebu
+    // TOTAL MAX SUPPLY = 6,500,000 bebu
     uint256 public constant FARMING_POOL_REWARD_ALLOCATION = 4000000 ether;
     uint256 public constant STABLE_FARMING_POOL_REWARD_ALLOCATION = 800000 ether;
-    uint256 public constant COMMUNITY_FUND_POOL_ALLOCATION = 500000 ether;
-    uint256 public constant DEV_FUND_POOL_ALLOCATION = 200000 ether;
+    uint256 public constant COMMUNITY_FUND_POOL_ALLOCATION = 700000 ether;
+    uint256 public constant DEV_FUND_POOL_ALLOCATION = 300000 ether;
 
     uint256 public constant VESTING_DURATION = 365 days;
     uint256 public startTime;
@@ -45,7 +45,7 @@ contract Bebu is ERC20Burnable, Operator {
     mapping(address => bool) public blacklist;
 
     constructor(uint256 _startTime, address _communityFund, address _devFund) public ERC20("BEBU", "BEBU") {
-        _mint(_communityFund, 500000 ether); // mint 500000 bebu for initial pools deployment and launchpad
+        _mint(_communityFund, 700000 ether); // mint 700000 bebu for initial pools deployment and launchpad
 
         startTime = _startTime;
         endTime = startTime + VESTING_DURATION;

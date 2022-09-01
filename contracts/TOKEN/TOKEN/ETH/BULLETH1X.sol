@@ -337,7 +337,20 @@ contract BULLETH1X is ERC20Burnable, Operator {
         uint diff = _IndexPrice - _RealtimePrice;
         uint numerator = diff.mul(2);
         uint denominator = Babylonian.sqrt(diff.mul(diff).mul(16) + _IndexPrice.mul(_IndexPrice));
-        reward = amount.mul(numerator).div(denominator).mul(rewardCoefficient).div(10000);
+        uint rewardLimit = calculateRewardLimit();
+        if (amount < rewardLimit) {
+            reward = amount.mul(numerator).div(denominator).mul(rewardCoefficient).div(10000);
+        } else {
+            reward = rewardLimit.mul(numerator).div(denominator).mul(rewardCoefficient).div(10000);
+        }
+    }
+
+    //calculate reward limit
+    function calculateRewardLimit() public view returns (uint rewardLimit) {
+        uint256 pegPrice = _getTokenRealtimeIndexPrice().mul(rewardThreshold).div(10000);
+        (uint256 amount0, uint256 amount1, ) = IUniswapV2Pair(pair).getReserves();
+        uint temp = Babylonian.sqrt(amount0.mul(amount1).div(pegPrice)).mul(1e9);
+        rewardLimit = amount1 - temp;
     }
 
     // View function to see usdc amount out on frontend.
